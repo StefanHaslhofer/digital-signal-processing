@@ -53,23 +53,38 @@ legend('N10', 'N100', 'N10000')
 hold off
 
 # calculate and plot fourier coefficients
-n = fourier_series(a, b, f0, t);
+n = fourier_series(a, b, 10 * f0, t);
 
 function a = fourier_coeff_a(n, f0, t)
   t0 = 1/f0;
   prefix = 2/t0;
 
   for k = 1:length(t)
-    fun = @(x) n(k).*cos(2.*pi.*k.*f0.*t(k));
-    a(k) = prefix * integral(fun, -t0/2, t0/2);
+    func = @(t) n(k).*cos(2.*pi.*k.*f0.*t);
+    a(k) = prefix * integral(func, -t0/2, t0/2);
   endfor
-
-
 end
 
-n10_a = fourier_coeff_a(n, f0, t);
+function a = fourier_coeff_b(n, f0, t)
+  t0 = 1/f0;
+  prefix = 2/t0;
+
+  for k = 1:length(t)
+    func = @(t) n(k).*sin(2.*pi.*k.*f0.*t);
+    a(k) = prefix * quad(func, -t0/2, t0/2);
+  endfor
+end
+
+n10_b = fourier_coeff_b(n, f0, t);
 
 figure (2);
-bar(t, n10_a);
+bar([0:length(n10_b)-1], n10_b);
+#bar([0:length(b)-1], b);
+xlabel('k');
+ylabel('bk');
+
+figure (3);
+#bar([0:length(n10_a)-1], n10_a);
+bar([0:length(a)-1], a);
 xlabel('k');
 ylabel('ak');

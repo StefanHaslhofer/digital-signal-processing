@@ -28,7 +28,7 @@ end
 
 # calculate input parameters
 f0 = 10;
-t = [0 : 0.01 : 2/f0];
+t = [0 : 0.001 : 2/f0];
 a = zeros(length(t),1); # vector a consists of zeros
 b = coeff(length(t));
 
@@ -58,14 +58,18 @@ n = fourier_series(a, b, f0, t);
 function a = fourier_coeff_a(n, f0, t)
   t0 = 1/f0;
   prefix = 2/t0;
+
   for k = 1:length(t)
-    a(k) = quad((n(k) * cos(2*pi*k*f0*t(k))), -t0/2, t0/2);
+    fun = @(x) n(k).*cos(2.*pi.*k.*f0.*t(k));
+    a(k) = prefix * integral(fun, -t0/2, t0/2);
   endfor
+
+
 end
 
 n10_a = fourier_coeff_a(n, f0, t);
 
 figure (2);
-plot(t, n10_a);
+bar(t, n10_a);
 xlabel('k');
 ylabel('ak');

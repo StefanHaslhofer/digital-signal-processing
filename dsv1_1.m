@@ -22,7 +22,7 @@ end
 # function that calculates b vector for "Sägezahnsignal"
 function ret = coeff (len)
   for k = 1:len
-    ret(k) = (-1)^(k-1)/k;
+    ret(k) = 2/pi*(-1)^(k-1)/k;
   endfor
 end
 

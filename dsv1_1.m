@@ -19,6 +19,13 @@ function ret = fourier_series (a, b, f0, t)
   endfor
 end
 
+# function that calculates b vector for "Sägezahnsignal"
+function ret = coeff (len)
+  for k = 1:len
+    ret(k) = (-1)^(k-1)/k;
+  endfor
+end
+
 # calculate input parameters
 f0 = 10;
 t = [0 : 0.0001 : 2/f0];

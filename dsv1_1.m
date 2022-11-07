@@ -60,7 +60,7 @@ function a = fourier_coeff_a(n, f0, t)
   prefix = 2/t0;
 
   for k = 1:length(t)
-    fun = @(x) n(k).*cos(2.*pi.*k.*f0.*t(k));
+    fun = @(x) n(k).*cos(2.*pi.*k.*f0.*x);
     a(k) = prefix * integral(fun, -t0/2, t0/2);
   endfor
 

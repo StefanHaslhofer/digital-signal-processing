@@ -23,6 +23,7 @@ f_p(2:end-1) = 2*f_p(2:end-1);
 f = 10000*(0:(length(t)/2))/length(t);
 
 figure (2);
+set(gca, "fontsize", 32);
 hold on;
 plot(f, f_p);
 plot(-f, f_p);

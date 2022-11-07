@@ -50,7 +50,7 @@ plot(t, n100)
 hold on
 plot(t, n10000, 'g')
 
-xlabel('t');
+xlabel('t(s)');
 ylabel('x(t)');
 legend('N10', 'N100', 'N10000')
 hold off
@@ -59,7 +59,8 @@ hold off
 figure (2);
 set(gca, "fontsize", 32);
 hold on
-bar([1:length(b)], b);
+% only show coefficient until 100 for better visualization
+bar([1:100], b(1:100));
 xlabel('k');
 ylabel('bk');
 hold off
@@ -75,55 +76,3 @@ hold off
 
 
 
-
-
-
-
-% calculation of ck (only for tests)
-function ck = get_ck()
-  t0 = 1/f0;
-  prefix = 2/t0;
-
-  for k = 1:length(t)
-    func = @(t) n(k).*cos(2.*pi.*k.*f0.*t);
-    a(k) = prefix * integral(func, -t0/2, t0/2);
-  endfor
-
-  ck = prefix * sum;
-end
-
-% calculation for coefficients (only for tests)
-function x = signal(t)
-  omega = 2 * pi * 10;
-  prefix = 2/pi;
-  sum = 0;
-
-  for k = 1:length(t)
-    sum += (-1)^(k-1)/k*sin(omega*k*t);
-  endfor
-
-  x = prefix * sum;
-end
-
-function a = fourier_coeff_a(f0, t)
-  t0 = 1/f0;
-  prefix = 2/t0;
-
-  for k = 1:length(t)
-    func = @(t) n(k).*cos(2.*pi.*k.*f0.*t);
-    a(k) = prefix * integral(func, -t0/2, t0/2);
-  endfor
-end
-
-function a = fourier_coeff_b(f0, t)
-  t0 = 1/f0;
-  prefix = 2/t0;
-
-  for k = 1:length(t)
-    % n(k) is wrong we need n(t)
-    func = @(t) signal(t).*sin(2.*pi.*k.*f0.*t);
-    a(k) = prefix * integral(func, -t0/2, t0/2);
-  endfor
-end
-
-%n10_b = fourier_coeff_b(10 * f0, t);

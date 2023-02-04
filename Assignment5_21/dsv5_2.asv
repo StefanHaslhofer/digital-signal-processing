@@ -1,0 +1,109 @@
+% JKU, Digitale Signalverarbeitung UE, WS 2022/23
+%#########################################################################
+% Assignment 5, Aufgabe2 : Cauer Filter
+%#########################################################################
+
+%--- Tolerance Schema
+Omega_pass = 0.1;
+Omega_stop = 0.15;
+Rp         = 0.5;
+Rs         = 60;
+
+%--- Aufgabe3.a.i : Filterordnung
+[N, Wp] = ellipord(Omega_pass, Omega_stop, Rp, Rs);
+
+%--- Aufgabe3.a.ii : Filterkoeffizienten
+[bC,aC] = ellip(N, Rp, Rs, Omega_pass);
+
+%--- Aufgabe3.a.iv : Betragsgang mit Toleranzgrenzen
+figure(21); hold off
+fftl=1024;                                     % number of frequency samples
+[H1,fv]=freqz(bC, aC, fftl);                    % Frequenzgang
+
+D1 = (((1 / 10^(Rp/20)) - 1) / -2);
+D2 = 1 / (10 ^ (Rs/20));
+TGo_m = [(1+D1), (1+D1), D2, D2]; 
+TGu_m = [(1-D1), (1-D1), 0, 0];
+
+plot(fv/pi,20*log10(abs(H1))); hold on;        %Zeichnen Sie hier den Betragsgang in dB
+plot([0, Omega_stop, Omega_stop, pi],20*(log10(TGo_m)),'r')                            %Zeichnen Sie hier die obere Toleranzgrenze
+plot(TGu_w,20*log10(TGu_m + 1e-12),'r')                            %Zeichnen Sie hier die untere Toleranzgrenze
+grid on;
+axis([0,pi,-256,5])
+xlabel('\Omega')
+ylabel('20*log(|H(e^{j\Omega})|)')
+
+%--- Aufgabe3.a.v : Gruppenlaufzeit
+figure(22); hold off
+fftl=1024;                                   % number of frequency samples
+[gd1,fv]=grpdelay(bC,aC,fftl);
+
+plot(fv/pi,gd1); hold on;
+grid on;
+xlabel('Frequenz')
+ylabel('Gruppenlaufzeit')
+
+%--- Aufgabe3.a.vi : Pol-Nullstellen Diagramm
+figure(23); hold off
+zplane(bC, aC);                                       %Zeichnen Sie hier das Pol-Nullstellen Diagramm
+
+
+%=========================================================================
+%Aufgabe3.b : Festkomma Implementierung
+%=========================================================================
+N_fractional_bits = 12; % Nachkomma Stellen der Koeffizienten
+bCq=round(bC*2^N_fractional_bits)/2^N_fractional_bits;
+aCq=round(aC*2^N_fractional_bits)/2^N_fractional_bits;
+
+%Überprüfen Sie die Stabilität des Filters mit quantisierten Koeffizienten.
+figure; 
+zplane(bCq,aCq); % Der Filter ist noch stabil falls alle Null- / Pollstellen noch im Einheitskreis sind
+
+
+%=========================================================================
+%Aufgabe3.c : Kaskadierte Struktur
+%=========================================================================
+%--- Aufgabe3.c.i
+[z, p, k] = ellip(N, Rp, Rs, Wp);
+
+%--- Aufgabe3.c.ii
+[SOS]         = zp2sos(z, p, k);
+
+%--- Aufgabe3.c.iii
+figure(24); hold off
+%Zeichnen Sie hier die Betragsgänge der einzelnen Teilfilter und des Gesamtfilters
+%Achten Sie auf korrekte Achsenbeschriftung und fügen Sie eine Legende zur
+%Unterscheidung der einzelen Linien.
+[H, fv] = freqz(SOS(1, 1:3), SOS(1, 4:6), fftl);
+plot(fv, H); hold on;
+
+[H, fv] = freqz(SOS(2, 1:3), SOS(2, 4:6), fftl);
+plot(fv, H); hold on;
+
+[H, fv] = freqz(SOS(3, 1:3), SOS(3, 4:6), fftl);
+plot(fv, H); hold on;
+
+[b,a] = sos2tf(SOS);
+[H, fv] = freqz(b,a,fftl);
+plot(fv, H); hold on;  
+
+grid on;
+xlabel('Frequenz')
+legend("1. Teilfilter", "2. Teilfilter", "3. Teilfilter", "Gesamtfilter")
+
+%--- Aufgabe3.c.iv
+N_fractional_bits = 12; % Nachkomma Stellen der Koeffizienten
+SOSq = round(SOS*2^N_fractional_bits)/2^N_fractional_bits;
+
+%Überprüfen Sie die Stabilität der Teilfilter mit quantisierten Koeffizienten.
+figure; hold on
+zplane(SOSq(1, 1:3), SOSq(1, 4:6)); 
+title("1. Teilfilter Poll-/Nullstellen")
+
+figure; hold on
+zplane(SOSq(2, 1:3), SOSq(2, 4:6));
+title("2. Teilfilter Poll-/Nullstellen")
+
+figure; hold on
+zplane(SOSq(3, 1:3), SOSq(3, 4:6));
+title("3. Teilfilter Poll-/Nullstellen")
